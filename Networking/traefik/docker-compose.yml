@@ -1,0 +1,44 @@
+---
+version: "2.1"
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    command:
+      - --global.sendAnonymousUsage=false
+      - "--certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_LETSENCRYPT_EMAIL}"
+      - "--providers.docker.defaultRule=Host(`{{ .Name }}.${TRAEFIK_DOMAIN}`)"
+      - "--entryPoints.https.http.tls.domains[0].main=${TRAEFIK_DOMAIN}"
+      - "--entryPoints.https.http.tls.domains[0].sans=*.${TRAEFIK_DOMAIN}"
+    restart: unless-stopped
+    ports:
+      - 443:443
+    volumes:
+      - ./traefik-config/:/etc/traefik/
+    networks:
+      - proxy
+    environment:
+      DOCKER_HOST: dockersocket
+      PORKBUN_API_KEY:  $PORKBUN_API_KEY
+      PORKBUN_SECRET_API_KEY: $PORKBUN_SECRET_API_KEY
+      TRAEFIK_DOMAIN: $TRAEFIK_DOMAIN
+      TRAEFIK_LETSENCRYPT_EMAIL: $TRAEFIK_LETSENCRYPT_EMAIL
+    depends_on:
+      - dockersocket
+
+  dockersocket:
+    image: tecnativa/docker-socket-proxy
+    container_name: dockersocket
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - proxy
+    environment:
+      CONTAINERS: 1
+      POST: 0
+
+networks:
+  proxy:
+    driver: bridge
+    external: true
