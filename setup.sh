@@ -1,6 +1,17 @@
 # TRAEFIK_SETUP
 
-""
+echo "Traefik requires a few variables to set up.  Please provide them here."
+echo "NOTE: This installation assumes you are using Porkbun."
+
+for TRAEFIK_VAR in PORKBUN_API_KEY PORKBUN_SECRET_API_KEY TRAEFIK_DOMAIN TRAEFIK_LETSENCRYPT_EMAIL; do
+    echo -n "Please enter ${TRAEFIK_VAR}: "
+    read TRAEFIK_VAR_TEMP_VAL
+    echo
+    echo "${TRAEFIK_VAR}=TRAEFIK_VAR_TEMP_VAL" >> Networking/traefik/.env
+done
+
+del TRAEFIK_VAR_TEMP_VAL
+echo "Please double-check your values in ./Networking/traefik/.env"
 
 
 # AUTHENTIK SETUP
